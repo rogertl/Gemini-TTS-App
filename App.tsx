@@ -1,5 +1,5 @@
 
-import React, { useEffect, useRef, useCallback } from 'react';
+import React, { useEffect } from 'react';
 import { useAppContext } from './context/AppContext';
 import { useApiKeyStatus } from './hooks/useApiKeyStatus';
 
@@ -10,11 +10,16 @@ import Step2Config from './components/Step2Config';
 import Step3Playback from './components/Step3Playback';
 import HistorySection from './components/HistorySection';
 import FooterInfo from './components/FooterInfo';
-import { setError, setAudioBlobUrl, setIsPlaying, setIsDuringPlayback } from './context/appActions';
+import ErrorModal from './components/ErrorModal'; // Import the new ErrorModal component
+import { setError, setAudioBlobUrl, setIsPlaying, setIsDuringPlayback, closeErrorModal } from './context/appActions';
 
 function App() {
   const { state, dispatch } = useAppContext();
-  const { currentStep, isLoading, error, apiKeySelected, showAdvancedModelSettings, audioBlobUrl, isPlaying, audioRef } = state;
+  const { 
+    currentStep, isLoading, error, apiKeySelected, 
+    showAdvancedModelSettings, audioBlobUrl, isPlaying, 
+    audioRef, showErrorModal, errorModalMessage 
+  } = state;
 
   // Effect to stop playing, clear audio when inputs or settings change, or step changes
   useEffect(() => {
@@ -31,10 +36,11 @@ function App() {
     
     // Only clear general errors if not related to API key or loading
     // Re-check `error` state against `apiKeySelected` and `isLoading` for more precise clearing.
-    if (error && !error.includes('API 密钥') && !isLoading && apiKeySelected) {
+    // If errorModalMessage is present, don't clear the generic error prematurely.
+    if (error && !error.includes('API 密钥') && !isLoading && apiKeySelected && !showErrorModal) {
       dispatch(setError(null));
     }
-  }, [state.originalTextInput, state.selectedColloquialStyle, state.selectedVoice, state.selectedModel, currentStep, audioBlobUrl, isPlaying, isLoading, error, dispatch, audioRef, apiKeySelected]);
+  }, [state.originalTextInput, state.selectedColloquialStyle, state.selectedVoice, state.selectedModel, currentStep, audioBlobUrl, isPlaying, isLoading, error, dispatch, audioRef, apiKeySelected, showErrorModal]);
 
 
   // API Key Status Check (using custom hook)
@@ -52,14 +58,11 @@ function App() {
       {currentStep === 2 && <Step2Config />}
       {currentStep === 3 && <Step3Playback />}
 
-      {error && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mt-6">
-          <p><strong>错误:</strong> {error}</p>
-        </div>
-      )}
-
       {/* Advanced Model Settings Modal */}
       {showAdvancedModelSettings && <AdvancedSettingsModal />}
+
+      {/* Error Modal */}
+      {showErrorModal && <ErrorModal message={errorModalMessage} onClose={() => dispatch(closeErrorModal())} />}
 
       {/* History Section */}
       <HistorySection />

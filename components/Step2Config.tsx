@@ -1,4 +1,5 @@
-import React, { useCallback, useEffect, useRef } from 'react';
+
+import React, { useCallback } from 'react';
 import { useAppContext } from '../context/AppContext';
 import { 
   setOptimizedTextInput, 
@@ -34,7 +35,6 @@ const Step2Config: React.FC = () => {
     apiKeySelected, 
     isDuringPlayback,
     audioContext,
-    history,
     estimatedGenerateTime,
     countdown,
   } = state;
@@ -67,9 +67,9 @@ const Step2Config: React.FC = () => {
 
     // Calculate estimated time (1 second per 10 characters, minimum 5 seconds)
     const length = optimizedTextInput.length;
-    const estimatedMs = Math.max(5000, Math.ceil(length / 10) * 1000); 
-    dispatch(setEstimatedGenerateTime(estimatedMs));
-    startCountdown(estimatedMs / 1000);
+    const estimatedSeconds = Math.max(5, Math.ceil(length / 10)); // Convert to seconds, min 5s
+    dispatch(setEstimatedGenerateTime(estimatedSeconds * 1000)); // Store in ms
+    startCountdown(estimatedSeconds); // Start countdown in seconds
 
     dispatch(setIsLoading(true));
     dispatch(setError(null));
@@ -105,7 +105,7 @@ const Step2Config: React.FC = () => {
 
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : String(err);
-      if (errorMessage.includes("Requested entity was not found.")) {
+      if (errorMessage.includes("API_KEY is not defined") || errorMessage.includes("Requested entity was not found.")) {
         dispatch(setError(
           'API 密钥可能无效或权限不足。请重新选择您的 API 密钥。' +
           '(账单链接: ai.google.dev/gemini-api/docs/billing)'
@@ -131,7 +131,6 @@ const Step2Config: React.FC = () => {
     apiKeySelected, 
     audioContext, 
     dispatch, 
-    history,
     startCountdown,
     clearCountdown
   ]);

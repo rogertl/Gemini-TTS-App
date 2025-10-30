@@ -1,4 +1,6 @@
+
 import { AppAction, HistoryItem, AdvancedModelConfig, AdvancedModelType } from '../types';
+import { initialAppState } from './appReducer'; // Import here to avoid circular dependency
 
 export const setCurrentStep = (step: number): AppAction => ({ type: 'SET_CURRENT_STEP', payload: step });
 export const setOriginalTextInput = (text: string): AppAction => ({ type: 'SET_ORIGINAL_TEXT_INPUT', payload: text });
@@ -35,6 +37,7 @@ export const setAdvancedCustomJsonConfig = (json: string): AppAction => ({
     payload: { ...initialAppState.advancedModelConfig, customJsonConfig: json } 
 }); // Simplified for now
 export const setAudioContext = (context: AudioContext | null): AppAction => ({ type: 'SET_AUDIO_CONTEXT', payload: context });
+export const setShowErrorModal = (show: boolean): AppAction => ({ type: 'SET_SHOW_ERROR_MODAL', payload: show }); // New action
+export const setErrorModalMessage = (message: string | null): AppAction => ({ type: 'SET_ERROR_MODAL_MESSAGE', payload: message }); // New action
+export const closeErrorModal = (): AppAction => ({ type: 'CLOSE_ERROR_MODAL' }); // New action
 export const restartApp = (): AppAction => ({ type: 'RESTART_APP' });
-
-import { initialAppState } from './appReducer'; // Import here to avoid circular dependency

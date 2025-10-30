@@ -40,6 +40,8 @@ export const initialAppState: GlobalAppState = {
   isDuringPlayback: false,
   audioContext: null,
   audioRef: { current: null }, // Initialize audioRef here according to GlobalAppState type
+  showErrorModal: false, // New: Default to not showing error modal
+  errorModalMessage: null, // New: No error message initially
 };
 
 export const appReducer = (state: GlobalAppState, action: AppAction): GlobalAppState => {
@@ -59,7 +61,13 @@ export const appReducer = (state: GlobalAppState, action: AppAction): GlobalAppS
     case 'SET_IS_LOADING':
       return { ...state, isLoading: action.payload };
     case 'SET_ERROR':
-      return { ...state, error: action.payload };
+      // When setting an error, also prepare to show the modal
+      return { 
+        ...state, 
+        error: action.payload,
+        errorModalMessage: action.payload,
+        showErrorModal: action.payload !== null, // Show modal if error payload is not null
+      };
     case 'SET_API_KEY_SELECTED':
       return { ...state, apiKeySelected: action.payload };
     case 'SET_AUDIO_BLOB_URL':
@@ -103,6 +111,12 @@ export const appReducer = (state: GlobalAppState, action: AppAction): GlobalAppS
       return { ...state, advancedModelConfig: action.payload };
     case 'SET_AUDIO_CONTEXT':
       return { ...state, audioContext: action.payload };
+    case 'SET_SHOW_ERROR_MODAL':
+      return { ...state, showErrorModal: action.payload };
+    case 'SET_ERROR_MODAL_MESSAGE':
+      return { ...state, errorModalMessage: action.payload };
+    case 'CLOSE_ERROR_MODAL':
+      return { ...state, showErrorModal: false, errorModalMessage: null, error: null }; // Also clear internal error
     case 'RESTART_APP':
       return {
         ...initialAppState,

@@ -1,5 +1,5 @@
 
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useAppContext } from '../context/AppContext';
 import { setError, setIsPlaying, setIsDuringPlayback } from '../context/appActions';
 
@@ -19,17 +19,24 @@ export const useAudioPlayback = () => {
       dispatch(setError('没有可播放的音频。请先生成语音。'));
       return;
     }
+    if (!audioContext) {
+      console.error('useAudioPlayback: audioContext is null');
+      dispatch(setError('音频上下文未初始化。'));
+      return;
+    }
     console.log('useAudioPlayback: audioRef.current exists. Current src:', audioRef.current.src);
 
     // Ensure AudioContext is running before attempting to play
-    if (audioContext && audioContext.state === 'suspended') {
-      console.log("useAudioPlayback: AudioContext is suspended, attempting to resume for playback...");
+    // Fix: AudioContext state does not include 'interrupted'. It can be 'suspended', 'running', or 'closed'.
+    // Checking for 'suspended' is appropriate for resuming playback.
+    if (audioContext.state === 'suspended') {
+      console.log(`useAudioPlayback: AudioContext is ${audioContext.state}, attempting to resume for playback...`);
       try {
         await audioContext.resume();
         console.log("useAudioPlayback: AudioContext resumed.");
       } catch (e) {
         console.error("useAudioPlayback: Failed to resume AudioContext:", e);
-        dispatch(setError("无法激活音频播放。请尝试刷新页面。"));
+        dispatch(setError(`无法激活音频播放：${e instanceof Error ? e.message : String(e)}。请尝试刷新页面。`));
         return;
       }
     }
@@ -43,7 +50,8 @@ export const useAudioPlayback = () => {
       audioRef.current.src = audioBlobUrl; // Ensure src is set
       audioRef.current.load(); // Explicitly call load() to ensure metadata is loaded
 
-      // Wait for loadedmetadata event, but non-blocking (not await)
+      // Try to play directly, as browsers often require user gesture
+      // and waiting for 'loadedmetadata' can break the gesture association.
       const playPromise = audioRef.current.play();
 
       if (playPromise !== undefined) {

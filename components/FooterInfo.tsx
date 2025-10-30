@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { APP_AUTHOR, APP_GITHUB_URL, APP_VERSION, APP_PUBLISH_DATE, MIT_LICENSE_TEXT } from '../constants';
 

@@ -1,11 +1,12 @@
+
 // Function to convert an AudioBuffer to a WAV Blob
 export const bufferToWave = (audioBuffer: AudioBuffer): Blob => {
     const numOfChan = audioBuffer.numberOfChannels;
     const length = audioBuffer.length * numOfChan * 2 + 44;
     const buffer = new ArrayBuffer(length);
     const view = new DataView(buffer);
-    const channels = [];
-    let i, sample;
+    let channels: Float32Array[] = [];
+    let i: number, sample: number;
     let offset = 0;
     let pos = 0;
   
@@ -55,4 +56,3 @@ export const bufferToWave = (audioBuffer: AudioBuffer): Blob => {
   
     return new Blob([buffer], { type: 'audio/wav' });
   };
-  

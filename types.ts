@@ -34,16 +34,11 @@ export interface AdvancedModelConfig {
   customJsonConfig: string;
 }
 
-// Define the AIStudio interface directly within declare global to avoid type conflict issues.
-// This resolves the "Subsequent property declarations must have the same type" error.
 declare global {
   interface Window {
-    // The 'aistudio' property is implicitly available in the Google AI Studio environment.
-    // Explicitly defining it here causes a type conflict.
-    // aistudio?: {
-    //   hasSelectedApiKey: () => Promise<boolean>;
-    //   openSelectKey: () => Promise<void>;
-    // };
+    // Rely on the Google AI Studio environment to provide 'aistudio' types implicitly.
+    // Explicitly defining it here often causes "Subsequent property declarations must have the same type" errors
+    // if the environment already defines it.
     webkitAudioContext?: typeof AudioContext; // For broader browser compatibility
   }
 }
@@ -71,6 +66,8 @@ export interface GlobalAppState {
   isDuringPlayback: boolean;
   audioContext: AudioContext | null; // Added to manage AudioContext centrally
   audioRef: React.RefObject<HTMLAudioElement>; // Add audioRef to GlobalAppState
+  showErrorModal: boolean; // New: Controls visibility of error modal
+  errorModalMessage: string | null; // New: Message for the error modal
 }
 
 // Action Types for Reducer
@@ -82,7 +79,7 @@ export type AppAction =
   | { type: 'SET_SELECTED_VOICE'; payload: string }
   | { type: 'SET_SELECTED_MODEL'; payload: string }
   | { type: 'SET_IS_LOADING'; payload: boolean }
-  | { type: 'SET_ERROR'; payload: string | null }
+  | { type: 'SET_ERROR'; payload: string | null } // This action will now also trigger the modal
   | { type: 'SET_API_KEY_SELECTED'; payload: boolean }
   | { type: 'SET_AUDIO_BLOB_URL'; payload: string | null }
   | { type: 'SET_IS_PLAYING'; payload: boolean }
@@ -98,6 +95,9 @@ export type AppAction =
   | { type: 'SET_SHOW_ADVANCED_MODEL_SETTINGS'; payload: boolean }
   | { type: 'SET_ADVANCED_MODEL_CONFIG'; payload: AdvancedModelConfig }
   | { type: 'SET_AUDIO_CONTEXT'; payload: AudioContext | null }
+  | { type: 'SET_SHOW_ERROR_MODAL'; payload: boolean } // New action
+  | { type: 'SET_ERROR_MODAL_MESSAGE'; payload: string | null } // New action
+  | { type: 'CLOSE_ERROR_MODAL' } // New action
   | { type: 'RESTART_APP' };
 
 export {}; // Ensures this file is treated as a module.

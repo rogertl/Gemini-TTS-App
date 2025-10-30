@@ -5,7 +5,7 @@ export const VOICE_OPTIONS: VoiceOption[] = [
   { name: 'Zephyr', label: 'Zephyr (标准)' },
   { name: 'Puck', label: 'Puck (活泼)' },
   { name: 'Charon', label: 'Charon (深沉)' },
-  { name: 'Kore (清晰)', label: 'Kore (清晰)' }, // Corrected name
+  { name: 'Kore', label: 'Kore (清晰)' }, // Corrected name, was Kore (清晰)
   { name: 'Fenrir', label: 'Fenrir (洪亮)' },
 ];
 
@@ -39,7 +39,7 @@ export const LOCAL_STORAGE_HISTORY_KEY = 'geminiTtsHistory';
 // App Metadata
 export const APP_AUTHOR = 'Roger';
 export const APP_GITHUB_URL = 'https://github.com/rogertl/Gemini-TTS-App';
-export const APP_VERSION = '1.0.9'; // Updated version for bug fixes and playback fix
+export const APP_VERSION = '1.1.1'; // Updated version for error modal implementation
 export const APP_PUBLISH_DATE = '2025-10-30'; // Corrected date
 
 export const MIT_LICENSE_TEXT = `MIT License

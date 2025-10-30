@@ -1,10 +1,10 @@
 
+
 import React, { useCallback, useEffect } from 'react';
 import { useAppContext } from '../context/AppContext';
 import { 
   setError, 
   setAudioBlobUrl, 
-  // Removed setIsPlaying, setIsDuringPlayback as they are managed by useAudioPlayback
   restartApp, 
 } from '../context/appActions';
 import { COLLOQUIAL_STYLE_OPTIONS } from '../constants';
@@ -17,7 +17,6 @@ const Step3Playback: React.FC = () => {
     selectedColloquialStyle,
     audioBlobUrl, 
     isLoading, 
-    // isPlaying, isDuringPlayback now from hook
   } = state;
 
   const {
@@ -25,8 +24,7 @@ const Step3Playback: React.FC = () => {
     isDuringPlayback,
     handlePlayToggle,
     handleStopPlayback,
-    handleAudioEnded, // This will be attached to audioRef.current by the hook
-  } = useAudioPlayback();
+  } = useAudioPlayback(); // Removed handleAudioEnded from destructuring, as it's attached internally by the hook
 
   // Cleanup function for audioBlobUrl when it changes or component unmounts
   useEffect(() => {

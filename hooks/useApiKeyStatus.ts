@@ -1,3 +1,4 @@
+
 import { useCallback, useEffect } from 'react';
 import { useAppContext } from '../context/AppContext';
 import { setApiKeySelected, setError } from '../context/appActions';
@@ -7,6 +8,8 @@ export const useApiKeyStatus = () => {
   const { apiKeySelected } = state;
 
   const checkApiKey = useCallback(async () => {
+    // window.aistudio is implicitly available in the Google AI Studio environment
+    // Its presence means the environment can manage API keys
     if (window.aistudio && typeof window.aistudio.hasSelectedApiKey === 'function') {
       try {
         const hasKey = await window.aistudio.hasSelectedApiKey();
@@ -22,7 +25,8 @@ export const useApiKeyStatus = () => {
         dispatch(setApiKeySelected(false));
       }
     } else {
-      // Fallback for environments without window.aistudio
+      // Fallback for environments without window.aistudio (e.g., local development)
+      // In such cases, API_KEY must be provided as an environment variable.
       const keyExists = !!process.env.API_KEY;
       dispatch(setApiKeySelected(keyExists));
       if (!keyExists) {
@@ -42,14 +46,14 @@ export const useApiKeyStatus = () => {
       try {
         await window.aistudio.openSelectKey();
         dispatch(setApiKeySelected(true));
-        dispatch(setError(null));
+        dispatch(setError(null)); // Clear any previous API key error
       } catch (e) {
         console.error("打开 API 密钥选择器时出错:", e);
         dispatch(setError('无法打开 API 密钥选择对话框。请重试。'));
         dispatch(setApiKeySelected(false));
       }
     } else {
-      dispatch(setError('此环境中不支持 AI Studio API 密钥选择。'));
+      dispatch(setError('此环境中不支持 AI Studio API 密钥选择。请确保 API_KEY 环境变量已设置。'));
     }
   }, [dispatch]);
 

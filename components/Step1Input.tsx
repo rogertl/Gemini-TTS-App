@@ -1,3 +1,4 @@
+
 import React, { useCallback } from 'react';
 import { useAppContext } from '../context/AppContext';
 import { 
@@ -9,7 +10,6 @@ import {
   setApiKeySelected, 
   setShowVerbalizationTooltip,
   setShowAdvancedModelSettings,
-  // Fix: Import setOptimizedTextInput
   setOptimizedTextInput, 
 } from '../context/appActions';
 import { COLLOQUIAL_STYLE_OPTIONS } from '../constants';
@@ -115,7 +115,6 @@ const Step1Input: React.FC = () => {
             <span
               className="ml-2 text-blue-500 cursor-help"
               onMouseEnter={() => dispatch(setShowVerbalizationTooltip(true))}
-              // Fix: Correct typo from setShowVerizationTooltip to setShowVerbalizationTooltip
               onMouseLeave={() => dispatch(setShowVerbalizationTooltip(false))}
               aria-describedby="verbalization-rules-tooltip"
             >
