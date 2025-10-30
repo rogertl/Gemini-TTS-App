@@ -32,59 +32,58 @@ async function decodeAudioData(
 }
 
 /**
- * Processes text to remove non-colloquial symbols and format it for more natural speech.
- * This version includes specific "口语化" (verbalization) optimizations for Chinese text.
+ * Optimizes text for colloquial speech using the Gemini model.
+ * This function sends the text to a Gemini text model with a system instruction
+ * to transform it into more natural and idiomatic spoken Chinese,
+ * tailored to a specific colloquial style.
  * @param text The input text string.
- * @returns The processed text string.
+ * @param colloquialStyleDescription A description of the desired colloquial style.
+ * @returns A Promise that resolves to the optimized text string.
  */
-export function processTextForSpeech(text: string): string {
-  let processedText = text;
+export async function optimizeTextForColloquialSpeech(
+  text: string,
+  colloquialStyleDescription: string
+): Promise<string> {
+  if (!process.env.API_KEY) {
+    throw new Error("API_KEY is not defined.");
+  }
 
-  // 1. Initial cleanup: Remove non-spoken symbols and replace '&'
-  // Remove underscores, asterisks, hashtags, square/curly/round brackets if they're likely not intended to be spoken literally
-  processedText = processedText.replace(/[_*#@\[\]{}()]/g, ' ');
-  // Replace ampersand with " and " for verbalization
-  processedText = processedText.replace(/&/g, ' and ');
-  // Replace multiple spaces with a single space and trim
-  processedText = processedText.replace(/\s+/g, ' ').trim();
+  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
-  // 2. Handle percentages (e.g., "10%" -> "百分之10")
-  // The model is generally smart enough to read "百分之10" as "百分之十".
-  // This avoids complex number-to-Chinese-text conversion logic in the frontend.
-  processedText = processedText.replace(/(\d+(\.\d+)?)%/g, '百分之$1');
+  try {
+    const systemInstruction = `你是一个专业的中文口语化优化助手。你的任务是将用户提供的中文文本，转换成更自然、更地道的口语表达。
+    请根据以下口语化风格描述进行优化："${colloquialStyleDescription}"。
+    具体规则包括：注意语序、习惯用语（例如将“百分之十”转换为“百分之十”，将“API”转换为“A P I”等），处理数字、日期、单位和百分比的表述，使其听起来更自然。简化可能存在的复杂句子结构，去除书面语痕迹，使文本听起来像日常对话。
+    只返回优化后的文本，不要添加任何解释、额外信息或标点符号（如“好的，这是优化后的文本：”）。确保输出是纯粹的口语化文本。`;
 
-  // 3. Handle English acronyms (e.g., "API" -> "A P I")
-  // This regex targets sequences of two or more uppercase letters that form a word boundary.
-  // It aims to convert acronyms into spaced-out letters for clearer pronunciation.
-  // Example: "API" becomes "A P I", "USA" becomes "U S A".
-  // It uses a negative lookbehind and lookahead to avoid splitting letters within mixed-case words
-  // or splitting single capital letters.
-  processedText = processedText.replace(/(?<![a-zA-Z])([A-Z]{2,})(?![a-zA-Z])/g, (match) => {
-    return match.split('').join(' ');
-  });
-
-  // 4. For general numbers (e.g., "123", "2024年"), we will rely on the Gemini model's
-  // internal capabilities for natural pronunciation in a Chinese context.
-  // Implementing a robust number-to-Chinese character converter is beyond the scope of a
-  // minimal frontend change and often leads to context-specific errors.
-  // The model is typically good at reading "123" as "一百二十三" or "一二三" depending on context.
-
-  return processedText;
+    const response = await ai.models.generateContent({
+      model: 'gemini-2.5-flash', // Use a text model for optimization
+      contents: text,
+      config: {
+        systemInstruction: systemInstruction,
+      },
+    });
+    return response.text.trim();
+  } catch (error) {
+    console.error("Error optimizing text for colloquial speech:", error);
+    throw new Error(`Failed to optimize text for colloquial speech: ${error instanceof Error ? error.message : String(error)}`);
+  }
 }
+
 
 /**
  * Generates speech from text using the Gemini Text-to-Speech API.
- * @param text The text to convert to speech.
+ * @param text The text to convert to speech. This text is expected to be already optimized for colloquial speech.
  * @param voiceName The name of the voice to use (e.g., 'Zephyr', 'Kore').
  * @param modelName The name of the Gemini model to use for TTS.
  * @param audioContext The AudioContext for decoding audio data.
  * @returns A Promise that resolves to an AudioBuffer, or rejects with an error.
- */
+*/
 export async function generateSpeech(
   text: string,
   voiceName: string,
   modelName: string,
-  audioContext: AudioContext
+  audioContext: AudioContext,
 ): Promise<AudioBuffer> {
   if (!process.env.API_KEY) {
     throw new Error("API_KEY is not defined.");
