@@ -1,0 +1,5 @@
+{
+  "name": "Gemini TTS App",
+  "description": "A Text-to-Speech application powered by Google Gemini, offering multiple voice styles and natural spoken output.",
+  "requestFramePermissions": []
+}
