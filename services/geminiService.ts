@@ -1,3 +1,4 @@
+
 import { GoogleGenAI, Modality } from '@google/genai';
 
 // Helper function to decode base64 string to Uint8Array
@@ -12,7 +13,7 @@ function decode(base64: string): Uint8Array {
 }
 
 // Helper function to decode raw PCM audio data into an AudioBuffer
-async function decodeAudioData(
+export async function decodeAudioData(
   data: Uint8Array,
   ctx: AudioContext,
   sampleRate: number,
@@ -54,8 +55,9 @@ export async function optimizeTextForColloquialSpeech(
     const systemInstruction = `你是一个专业的中文口语化优化助手。你的任务是将用户提供的中文文本，转换成更自然、更地道的口语表达。
     请根据以下口语化风格描述进行优化："${colloquialStyleDescription}"。
     具体规则包括：注意语序、习惯用语（例如将“百分之十”转换为“百分之十”，将“API”转换为“A P I”等），处理数字、日期、单位和百分比的表述，使其听起来更自然。简化可能存在的复杂句子结构，去除书面语痕迹，使文本听起来像日常对话。
-    只返回优化后的文本，不要添加任何解释、额外信息或标点符号（如“好的，这是优化后的文本：”）。确保输出是纯粹的口语化文本。`;
+    **只返回优化后的纯文本，确保包含自然的中文断句标点符号（如逗号、句号、问号、感叹号等，但不限于这些），不要包含任何Markdown语法（如粗体、斜体、列表等）、其他特殊符号（如星号、井号等）、解释或额外信息。确保输出是完全纯净且适合口语朗读的文本。**`;
 
+    console.log("Calling Gemini for colloquial optimization with style:", colloquialStyleDescription);
     const response = await ai.models.generateContent({
       model: 'gemini-2.5-flash', // Use a text model for optimization
       contents: text,
@@ -63,7 +65,9 @@ export async function optimizeTextForColloquialSpeech(
         systemInstruction: systemInstruction,
       },
     });
-    return response.text.trim();
+    const optimizedText = response.text.trim();
+    console.log("Colloquial optimization successful. Optimized text:", optimizedText);
+    return optimizedText;
   } catch (error) {
     console.error("Error optimizing text for colloquial speech:", error);
     throw new Error(`Failed to optimize text for colloquial speech: ${error instanceof Error ? error.message : String(error)}`);
@@ -93,6 +97,7 @@ export async function generateSpeech(
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
   try {
+    console.log("Calling Gemini for speech generation with model:", modelName, "voice:", voiceName);
     const response = await ai.models.generateContent({
       model: modelName, // Use the provided modelName
       contents: [{ parts: [{ text: text }] }],
@@ -110,6 +115,13 @@ export async function generateSpeech(
 
     if (!base64Audio) {
       throw new Error("No audio data received from the API.");
+    }
+    console.log("Speech generation successful. Decoding audio data.");
+
+    // Ensure AudioContext is running before decoding
+    if (audioContext.state === 'suspended') {
+        console.log("AudioContext is suspended, attempting to resume for decoding...");
+        await audioContext.resume();
     }
 
     const audioBuffer = await decodeAudioData(

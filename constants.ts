@@ -1,10 +1,11 @@
+
 import { VoiceOption, TTSModelOption, ColloquialStyleOption } from './types';
 
 export const VOICE_OPTIONS: VoiceOption[] = [
   { name: 'Zephyr', label: 'Zephyr (标准)' },
   { name: 'Puck', label: 'Puck (活泼)' },
   { name: 'Charon', label: 'Charon (深沉)' },
-  { name: 'Kore', label: 'Kore (清晰)' },
+  { name: 'Kore (清晰)', label: 'Kore (清晰)' }, // Corrected name
   { name: 'Fenrir', label: 'Fenrir (洪亮)' },
 ];
 
@@ -34,3 +35,32 @@ export const COLLOQUIAL_STYLE_OPTIONS: ColloquialStyleOption[] = [
 export const DEFAULT_COLLOQUIAL_STYLE_NAME = 'Standard';
 
 export const LOCAL_STORAGE_HISTORY_KEY = 'geminiTtsHistory';
+
+// App Metadata
+export const APP_AUTHOR = 'Roger';
+export const APP_GITHUB_URL = 'https://github.com/rogertl/Gemini-TTS-App';
+export const APP_VERSION = '1.0.9'; // Updated version for bug fixes and playback fix
+export const APP_PUBLISH_DATE = '2025-10-30'; // Corrected date
+
+export const MIT_LICENSE_TEXT = `MIT License
+
+Copyright (c) 2024 Roger
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+`;
