@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { useAppContext } from './context/AppContext';
 import { useApiKeyStatus } from './hooks/useApiKeyStatus';
@@ -44,14 +43,14 @@ function App() {
 
 
   // API Key Status Check (using custom hook)
-  const { handleSelectApiKey } = useApiKeyStatus();
+  const { apiKeySelected: hookApiKeySelected } = useApiKeyStatus(); // Adjusted destructuring
 
   return (
     <div className="flex flex-col space-y-6">
       <h1 className="text-3xl font-bold text-gray-800 mb-2 text-center">Gemini 文字转语音</h1>
 
       {/* API Key Selection Warning */}
-      {!apiKeySelected && <ApiKeyPrompt onSelectApiKey={handleSelectApiKey} />}
+      {!hookApiKeySelected && <ApiKeyPrompt />} {/* Adjusted prop */}
 
       {/* Main Steps */}
       {currentStep === 1 && <Step1Input />}

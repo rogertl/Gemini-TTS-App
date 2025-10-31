@@ -1,4 +1,3 @@
-
 import React, { useCallback } from 'react';
 import { useAppContext } from '../context/AppContext';
 import { 
@@ -109,9 +108,7 @@ const Step2Config: React.FC = () => {
       if (errorMessage.includes("API_KEY is not defined") || errorMessage.includes("Requested entity was not found.")) {
         dispatch(setError(getFriendlyErrorMessage(errorMessage))); // Use friendly message
         dispatch(setApiKeySelected(false)); // Assume key might be invalid
-        if (window.aistudio && typeof window.aistudio.openSelectKey === 'function') {
-           window.aistudio.openSelectKey(); // Prompt user to select again
-        }
+        // Removed window.aistudio.openSelectKey();
       } else {
         dispatch(setError(getFriendlyErrorMessage(`生成语音失败: ${errorMessage}`))); // Use friendly message
       }
