@@ -2,6 +2,7 @@
 import React, { createContext, useReducer, useContext, useRef, ReactNode, useEffect } from 'react';
 import { appReducer, initialAppState } from './appReducer';
 import { GlobalAppState, AppAction } from '../types';
+import { getFriendlyErrorMessage } from '../utils/errorUtils'; // Import the new utility
 
 interface AppContextType {
   state: GlobalAppState;
@@ -30,9 +31,9 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
         console.log("AudioContext created and stored in ref/state:", newAudioContext);
       } catch (e) {
         console.error("Failed to initialize AudioContext:", e);
-        dispatch({ type: 'SET_ERROR_MODAL_MESSAGE', payload: "无法初始化音频播放。请确保您的浏览器支持Web Audio API。" });
+        dispatch({ type: 'SET_ERROR_MODAL_MESSAGE', payload: getFriendlyErrorMessage("无法初始化音频播放。请确保您的浏览器支持Web Audio API。") });
         dispatch({ type: 'SET_SHOW_ERROR_MODAL', payload: true });
-        dispatch({ type: 'SET_ERROR', payload: "无法初始化音频播放" }); // For internal state tracking
+        dispatch({ type: 'SET_ERROR', payload: getFriendlyErrorMessage("无法初始化音频播放") }); // For internal state tracking
       }
     }
 
@@ -60,9 +61,9 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
         onEnded={() => dispatch({ type: 'SET_IS_PLAYING', payload: false })} 
         onError={(e) => {
           console.error("Audio playback error:", e);
-          dispatch({ type: 'SET_ERROR_MODAL_MESSAGE', payload: `音频播放失败: ${e.type}` });
+          dispatch({ type: 'SET_ERROR_MODAL_MESSAGE', payload: getFriendlyErrorMessage(`音频播放失败: ${e.type}`) });
           dispatch({ type: 'SET_SHOW_ERROR_MODAL', payload: true });
-          dispatch({ type: 'SET_ERROR', payload: `音频播放失败: ${e.type}` }); // For internal state tracking
+          dispatch({ type: 'SET_ERROR', payload: getFriendlyErrorMessage(`音频播放失败: ${e.type}`) }); // For internal state tracking
           dispatch({ type: 'SET_IS_PLAYING', payload: false });
           dispatch({ type: 'SET_IS_DURING_PLAYBACK', payload: false });
         }}

@@ -17,6 +17,7 @@ import { optimizeTextForColloquialSpeech } from '../services/geminiService';
 import LoadingSpinner from './common/LoadingSpinner';
 import Tooltip from './common/Tooltip';
 import { ColloquialStyleOption } from '../types';
+import { getFriendlyErrorMessage } from '../utils/errorUtils'; // Import the new utility
 
 const Step1Input: React.FC = () => {
   const { state, dispatch } = useAppContext();
@@ -33,12 +34,12 @@ const Step1Input: React.FC = () => {
 
   const handleOptimizeText = useCallback(async () => {
     if (!originalTextInput.trim()) {
-      dispatch(setError('请输入原始文本进行优化。'));
+      dispatch(setError(getFriendlyErrorMessage('请输入原始文本进行优化。')));
       return;
     }
     
     if (!apiKeySelected) {
-      dispatch(setError('API 密钥未选择。请选择您的 API 密钥。'));
+      dispatch(setError(getFriendlyErrorMessage('API 密钥未选择。请选择您的 API 密钥。')));
       return;
     }
 
@@ -56,16 +57,13 @@ const Step1Input: React.FC = () => {
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : String(err);
       if (errorMessage.includes("API_KEY is not defined") || errorMessage.includes("Requested entity was not found.")) {
-        dispatch(setError(
-          'API 密钥可能无效或权限不足。请重新选择您的 API 密钥。' +
-          '(账单链接: ai.google.dev/gemini-api/docs/billing)'
-        ));
+        dispatch(setError(getFriendlyErrorMessage(errorMessage))); // Use friendly message
         dispatch(setApiKeySelected(false)); // Assume key might be invalid
         if (window.aistudio && typeof window.aistudio.openSelectKey === 'function') {
            window.aistudio.openSelectKey(); // Prompt user to select again
         }
       } else {
-        dispatch(setError(`口语化优化失败: ${errorMessage}`));
+        dispatch(setError(getFriendlyErrorMessage(`口语化优化失败: ${errorMessage}`))); // Use friendly message
       }
     } finally {
       dispatch(setIsLoading(false));

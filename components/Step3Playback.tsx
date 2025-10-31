@@ -1,5 +1,4 @@
 
-
 import React, { useCallback, useEffect } from 'react';
 import { useAppContext } from '../context/AppContext';
 import { 
@@ -9,6 +8,7 @@ import {
 } from '../context/appActions';
 import { COLLOQUIAL_STYLE_OPTIONS } from '../constants';
 import { useAudioPlayback } from '../hooks/useAudioPlayback'; // Import the hook
+import { getFriendlyErrorMessage } from '../utils/errorUtils'; // Import the new utility
 
 const Step3Playback: React.FC = () => {
   const { state, dispatch } = useAppContext();
@@ -44,7 +44,7 @@ const Step3Playback: React.FC = () => {
       a.click();
       document.body.removeChild(a);
     } else {
-      dispatch(setError('没有可下载的音频。请先生成语音。'));
+      dispatch(setError(getFriendlyErrorMessage('没有可下载的音频。请先生成语音。')));
     }
   }, [audioBlobUrl, dispatch]);
 

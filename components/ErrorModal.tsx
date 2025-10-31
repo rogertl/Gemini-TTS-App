@@ -18,7 +18,7 @@ const ErrorModal: React.FC<ErrorModalProps> = ({ message, onClose }) => {
     >
       <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-md space-y-4">
         <h3 id="error-modal-title" className="text-2xl font-bold text-red-700">错误</h3>
-        <p className="text-gray-800 whitespace-pre-wrap">{message}</p>
+        <p className="text-gray-800 whitespace-pre-wrap max-h-[70vh] overflow-y-auto">{message}</p>
         <div className="flex justify-end">
           <button
             onClick={onClose}

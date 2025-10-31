@@ -2,6 +2,7 @@
 import { useCallback, useEffect } from 'react';
 import { useAppContext } from '../context/AppContext';
 import { setError, setIsPlaying, setIsDuringPlayback } from '../context/appActions';
+import { getFriendlyErrorMessage } from '../utils/errorUtils'; // Import the new utility
 
 export const useAudioPlayback = () => {
   const { state, dispatch } = useAppContext();
@@ -11,24 +12,22 @@ export const useAudioPlayback = () => {
     console.log('useAudioPlayback: handlePlayToggle called. isPlaying:', isPlaying, 'audioBlobUrl:', audioBlobUrl);
     if (!audioRef.current) {
       console.error('useAudioPlayback: audioRef.current is null');
-      dispatch(setError('音频播放器未准备好。'));
+      dispatch(setError(getFriendlyErrorMessage('音频播放器未准备好。')));
       return;
     }
     if (!audioBlobUrl) {
       console.error('useAudioPlayback: audioBlobUrl is null');
-      dispatch(setError('没有可播放的音频。请先生成语音。'));
+      dispatch(setError(getFriendlyErrorMessage('没有可播放的音频。请先生成语音。')));
       return;
     }
     if (!audioContext) {
       console.error('useAudioPlayback: audioContext is null');
-      dispatch(setError('音频上下文未初始化。'));
+      dispatch(setError(getFriendlyErrorMessage('音频上下文未初始化。')));
       return;
     }
     console.log('useAudioPlayback: audioRef.current exists. Current src:', audioRef.current.src);
 
     // Ensure AudioContext is running before attempting to play
-    // Fix: AudioContext state does not include 'interrupted'. It can be 'suspended', 'running', or 'closed'.
-    // Checking for 'suspended' is appropriate for resuming playback.
     if (audioContext.state === 'suspended') {
       console.log(`useAudioPlayback: AudioContext is ${audioContext.state}, attempting to resume for playback...`);
       try {
@@ -36,9 +35,11 @@ export const useAudioPlayback = () => {
         console.log("useAudioPlayback: AudioContext resumed.");
       } catch (e) {
         console.error("useAudioPlayback: Failed to resume AudioContext:", e);
-        dispatch(setError(`无法激活音频播放：${e instanceof Error ? e.message : String(e)}。请尝试刷新页面。`));
+        dispatch(setError(getFriendlyErrorMessage(`无法激活音频播放：${e instanceof Error ? e.message : String(e)}`)));
         return;
       }
+    } else {
+      console.log(`useAudioPlayback: AudioContext is already ${audioContext.state}.`);
     }
 
 
@@ -50,8 +51,11 @@ export const useAudioPlayback = () => {
       audioRef.current.src = audioBlobUrl; // Ensure src is set
       audioRef.current.load(); // Explicitly call load() to ensure metadata is loaded
 
+      console.log('useAudioPlayback: Attempting to play audio.');
+      console.log('  audioRef.current.readyState:', audioRef.current.readyState); // 0=HAVE_NOTHING, 1=HAVE_METADATA, 2=HAVE_CURRENT_DATA, 3=HAVE_FUTURE_DATA, 4=HAVE_ENOUGH_DATA
+      console.log('  audioRef.current.networkState:', audioRef.current.networkState); // 0=NETWORK_EMPTY, 1=NETWORK_IDLE, 2=NETWORK_LOADING, 3=NETWORK_NO_SOURCE
+
       // Try to play directly, as browsers often require user gesture
-      // and waiting for 'loadedmetadata' can break the gesture association.
       const playPromise = audioRef.current.play();
 
       if (playPromise !== undefined) {
@@ -61,7 +65,12 @@ export const useAudioPlayback = () => {
           console.log('useAudioPlayback: Audio playback initiated successfully.');
         }).catch(playError => {
           console.error('useAudioPlayback: Error initiating audio playback:', playError);
-          dispatch(setError(`无法播放音频：${playError instanceof Error ? playError.message : String(playError)}。浏览器可能阻止了自动播放，请尝试手动操作或检查浏览器设置。`));
+          // More descriptive message for autoplay issues
+          let errorMessage = `无法播放音频：${playError instanceof Error ? playError.message : String(playError)}。`;
+          if (playError.name === "NotAllowedError" || playError.name === "AbortError") {
+            errorMessage += " 这可能是由于浏览器自动播放策略限制，请尝试手动播放，或确保页面有用户交互。";
+          }
+          dispatch(setError(getFriendlyErrorMessage(errorMessage)));
           dispatch(setIsPlaying(false));
           dispatch(setIsDuringPlayback(false));
         });
