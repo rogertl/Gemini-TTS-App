@@ -1,3 +1,6 @@
+vibecoding版本。
+开心第一。
+导入Google ai studio最方便，后面再慢慢优化。
 
 # Gemini 文字转语音 App
 
