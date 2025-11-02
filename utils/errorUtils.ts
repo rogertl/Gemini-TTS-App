@@ -1,4 +1,5 @@
 
+
 export const getFriendlyErrorMessage = (rawError: string | null): string => {
   if (!rawError) return '发生未知错误。请稍后再试。';
 
@@ -26,6 +27,14 @@ export const getFriendlyErrorMessage = (rawError: string | null): string => {
   if (lowerCaseError.includes('no audio data received from the api')) {
     return '未从模型接收到音频数据。';
   }
+  // New: MP3 encoding errors
+  if (lowerCaseError.includes('web workers are not supported')) {
+    return '您的浏览器不支持Web Workers，无法进行MP3编码。请选择WAV格式。';
+  }
+  if (lowerCaseError.includes('mp3 encoding worker error') || lowerCaseError.includes('failed to encode audio to mp3')) {
+    return 'MP3编码失败。请稍后再试或选择WAV格式。';
+  }
+
 
   // Specific application flow errors (already concise, but keeping for consistency)
   if (lowerCaseError.includes('请输入原始文本')) return '请输入原始文本进行优化。';

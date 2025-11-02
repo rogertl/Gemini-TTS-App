@@ -1,3 +1,5 @@
+
+
 import React, { useCallback } from 'react';
 import { useAppContext } from '../context/AppContext';
 import { 
@@ -14,12 +16,13 @@ import {
   setCountdown,
   setIsPlaying,
   setIsDuringPlayback,
+  setSelectedOutputFormat, // Import new action
 } from '../context/appActions';
-import { TTS_MODELS, VOICE_OPTIONS, COLLOQUIAL_STYLE_OPTIONS } from '../constants';
+import { TTS_MODELS, VOICE_OPTIONS, COLLOQUIAL_STYLE_OPTIONS, OUTPUT_FORMAT_OPTIONS } from '../constants';
 import { generateSpeech } from '../services/geminiService';
-import { bufferToWave } from '../utils/audioUtils';
+import { bufferToWave, encodeAudioToMp3Blob } from '../utils/audioUtils'; // Import new encoding function
 import LoadingSpinner from './common/LoadingSpinner';
-import { HistoryItem } from '../types';
+import { HistoryItem, OutputFormat } from '../types';
 import { useCountdownTimer } from '../hooks/useCountdownTimer';
 import { getFriendlyErrorMessage } from '../utils/errorUtils'; // Import the new utility
 
@@ -31,6 +34,7 @@ const Step2Config: React.FC = () => {
     selectedColloquialStyle,
     selectedVoice, 
     selectedModel, 
+    selectedOutputFormat, // Get selected output format from state
     isLoading, 
     apiKeySelected, 
     isDuringPlayback,
@@ -86,8 +90,18 @@ const Step2Config: React.FC = () => {
         audioContext,
       );
 
-      const wavBlob = bufferToWave(audioBuffer);
-      const url = URL.createObjectURL(wavBlob);
+      let outputBlob: Blob;
+      let outputMimeType: string;
+
+      if (selectedOutputFormat === 'mp3') {
+        outputBlob = await encodeAudioToMp3Blob(audioBuffer);
+        outputMimeType = 'audio/mpeg';
+      } else { // Default to wav
+        outputBlob = bufferToWave(audioBuffer);
+        outputMimeType = 'audio/wav';
+      }
+      
+      const url = URL.createObjectURL(outputBlob);
       dispatch(setAudioBlobUrl(url));
       dispatch(setCurrentStep(3)); // Move to step 3 on success
 
@@ -100,6 +114,7 @@ const Step2Config: React.FC = () => {
         voiceName: selectedVoice,
         modelName: selectedModel,
         colloquialStyleName: selectedColloquialStyle,
+        outputFormat: selectedOutputFormat, // Save output format to history
       };
       dispatch(addHistoryItem(newHistoryItem));
 
@@ -123,6 +138,7 @@ const Step2Config: React.FC = () => {
     selectedColloquialStyle,
     selectedVoice, 
     selectedModel, 
+    selectedOutputFormat, // Add to dependencies
     apiKeySelected, 
     audioContext, 
     dispatch, 
@@ -175,6 +191,24 @@ const Step2Config: React.FC = () => {
           {VOICE_OPTIONS.map((voice) => (
             <option key={voice.name} value={voice.name}>
               {voice.label}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      {/* New Output Format Selection */}
+      <div>
+        <label htmlFor="output-format-select" className="block text-sm font-medium text-gray-700 mb-1">选择输出格式:</label>
+        <select
+          id="output-format-select"
+          value={selectedOutputFormat}
+          onChange={(e) => dispatch(setSelectedOutputFormat(e.target.value as OutputFormat))}
+          className="block w-full p-2 border border-gray-300 rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-50 disabled:cursor-not-allowed"
+          disabled={disableForm}
+        >
+          {OUTPUT_FORMAT_OPTIONS.map((format) => (
+            <option key={format.name} value={format.name}>
+              {format.label}
             </option>
           ))}
         </select>

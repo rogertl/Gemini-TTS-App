@@ -1,4 +1,5 @@
 
+
 import React, { useCallback } from 'react';
 import { useAppContext } from '../context/AppContext';
 import { 
@@ -15,8 +16,9 @@ import {
   setIsDuringPlayback,
   deleteHistoryItem,
   clearAllHistory,
+  setSelectedOutputFormat, // Import new action
 } from '../context/appActions';
-import { COLLOQUIAL_STYLE_OPTIONS } from '../constants';
+import { COLLOQUIAL_STYLE_OPTIONS, OUTPUT_FORMAT_OPTIONS } from '../constants'; // Import OUTPUT_FORMAT_OPTIONS
 import { HistoryItem } from '../types';
 
 const HistorySection: React.FC = () => {
@@ -29,6 +31,7 @@ const HistorySection: React.FC = () => {
     dispatch(setSelectedColloquialStyle(item.colloquialStyleName)); 
     dispatch(setSelectedVoice(item.voiceName));
     dispatch(setSelectedModel(item.modelName));
+    dispatch(setSelectedOutputFormat(item.outputFormat || 'wav')); // Load output format, default to 'wav' if not present
     dispatch(setCurrentStep(2));
     dispatch(setError(null));
     dispatch(setAudioBlobUrl(null));
@@ -80,6 +83,11 @@ const HistorySection: React.FC = () => {
                     {item.colloquialStyleName && (
                         <span className="ml-1 px-2 py-0.5 bg-purple-100 text-purple-800 text-xs font-medium rounded-full">
                           {COLLOQUIAL_STYLE_OPTIONS.find(s => s.name === item.colloquialStyleName)?.label || item.colloquialStyleName}
+                        </span>
+                      )}
+                    {item.outputFormat && (
+                        <span className="ml-1 px-2 py-0.5 bg-yellow-100 text-yellow-800 text-xs font-medium rounded-full">
+                          {OUTPUT_FORMAT_OPTIONS.find(f => f.name === item.outputFormat)?.label || item.outputFormat.toUpperCase()}
                         </span>
                       )}
                   </p>

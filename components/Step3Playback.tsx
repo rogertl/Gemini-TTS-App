@@ -1,4 +1,5 @@
 
+
 import React, { useCallback, useEffect } from 'react';
 import { useAppContext } from '../context/AppContext';
 import { 
@@ -17,6 +18,7 @@ const Step3Playback: React.FC = () => {
     selectedColloquialStyle,
     audioBlobUrl, 
     isLoading, 
+    selectedOutputFormat, // Get selected output format
   } = state;
 
   const {
@@ -39,14 +41,15 @@ const Step3Playback: React.FC = () => {
     if (audioBlobUrl) {
       const a = document.createElement('a');
       a.href = audioBlobUrl;
-      a.download = `gemini_speech_${Date.now()}.wav`;
+      const fileExtension = selectedOutputFormat === 'mp3' ? 'mp3' : 'wav';
+      a.download = `gemini_speech_${Date.now()}.${fileExtension}`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
     } else {
       dispatch(setError(getFriendlyErrorMessage('没有可下载的音频。请先生成语音。')));
     }
-  }, [audioBlobUrl, dispatch]);
+  }, [audioBlobUrl, selectedOutputFormat, dispatch]);
 
   const handleRestartApp = useCallback(() => {
     dispatch(restartApp());

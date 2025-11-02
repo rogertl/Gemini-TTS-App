@@ -1,4 +1,5 @@
 
+
 import React from 'react';
 
 export interface VoiceOption {
@@ -17,6 +18,13 @@ export interface ColloquialStyleOption {
   description: string; // Used to guide the AI
 }
 
+export interface OutputFormatOption {
+  name: OutputFormat;
+  label: string;
+}
+
+export type OutputFormat = 'wav' | 'mp3';
+
 export interface HistoryItem {
   id: string; // Unique ID for each history entry
   timestamp: number; // For sorting
@@ -25,6 +33,7 @@ export interface HistoryItem {
   voiceName: string;
   modelName: string;
   colloquialStyleName: string; // New field for colloquial style
+  outputFormat: OutputFormat; // New field for output format
 }
 
 export type AdvancedModelType = 'text' | 'image' | 'video' | 'custom';
@@ -53,6 +62,7 @@ export interface GlobalAppState {
   selectedColloquialStyle: string;
   selectedVoice: string;
   selectedModel: string;
+  selectedOutputFormat: OutputFormat; // New state for selected output format
   isLoading: boolean;
   error: string | null;
   apiKeySelected: boolean;
@@ -80,6 +90,7 @@ export type AppAction =
   | { type: 'SET_SELECTED_COLLOQUIAL_STYLE'; payload: string }
   | { type: 'SET_SELECTED_VOICE'; payload: string }
   | { type: 'SET_SELECTED_MODEL'; payload: string }
+  | { type: 'SET_SELECTED_OUTPUT_FORMAT'; payload: OutputFormat } // New action
   | { type: 'SET_IS_LOADING'; payload: boolean }
   | { type: 'SET_ERROR'; payload: string | null } // This action will now also trigger the modal
   | { type: 'SET_API_KEY_SELECTED'; payload: boolean }

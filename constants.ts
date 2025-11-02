@@ -1,11 +1,12 @@
 
-import { VoiceOption, TTSModelOption, ColloquialStyleOption } from './types';
+
+import { VoiceOption, TTSModelOption, ColloquialStyleOption, OutputFormatOption, OutputFormat } from './types';
 
 export const VOICE_OPTIONS: VoiceOption[] = [
   { name: 'Zephyr', label: 'Zephyr (标准)' },
   { name: 'Puck', label: 'Puck (活泼)' },
   { name: 'Charon', label: 'Charon (深沉)' },
-  { name: 'Kore', label: 'Kore (清晰)' }, // Corrected name, was Kore (清晰)
+  { name: 'Kore', label: 'Kore (清晰)' },
   { name: 'Fenrir', label: 'Fenrir (洪亮)' },
 ];
 
@@ -34,13 +35,20 @@ export const COLLOQUIAL_STYLE_OPTIONS: ColloquialStyleOption[] = [
 
 export const DEFAULT_COLLOQUIAL_STYLE_NAME = 'Standard';
 
+export const OUTPUT_FORMAT_OPTIONS: OutputFormatOption[] = [
+  { name: 'wav', label: 'WAV (无损)' },
+  { name: 'mp3', label: 'MP3 (压缩)' },
+];
+
+export const DEFAULT_OUTPUT_FORMAT: OutputFormat = 'wav';
+
 export const LOCAL_STORAGE_HISTORY_KEY = 'geminiTtsHistory';
 
 // App Metadata
 export const APP_AUTHOR = 'Roger';
 export const APP_GITHUB_URL = 'https://github.com/rogertl/Gemini-TTS-App';
-export const APP_VERSION = '1.1.1'; // Updated version for error modal implementation
-export const APP_PUBLISH_DATE = '2025-10-30'; // Corrected date
+export const APP_VERSION = '1.1.2'; // Updated version for MP3 implementation
+export const APP_PUBLISH_DATE = '2025-10-30';
 
 export const MIT_LICENSE_TEXT = `MIT License
 

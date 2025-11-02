@@ -1,6 +1,7 @@
 
-import { GlobalAppState, AppAction, AdvancedModelConfig } from '../types';
-import { DEFAULT_COLLOQUIAL_STYLE_NAME, DEFAULT_TTS_MODEL, DEFAULT_VOICE_NAME, LOCAL_STORAGE_HISTORY_KEY } from '../constants';
+
+import { GlobalAppState, AppAction, AdvancedModelConfig, OutputFormat } from '../types';
+import { DEFAULT_COLLOQUIAL_STYLE_NAME, DEFAULT_TTS_MODEL, DEFAULT_VOICE_NAME, LOCAL_STORAGE_HISTORY_KEY, DEFAULT_OUTPUT_FORMAT } from '../constants';
 
 const loadHistoryFromLocalStorage = (): GlobalAppState['history'] => {
   try {
@@ -25,6 +26,7 @@ export const initialAppState: GlobalAppState = {
   selectedColloquialStyle: DEFAULT_COLLOQUIAL_STYLE_NAME,
   selectedVoice: DEFAULT_VOICE_NAME,
   selectedModel: DEFAULT_TTS_MODEL.name,
+  selectedOutputFormat: DEFAULT_OUTPUT_FORMAT, // Initialize with default output format
   isLoading: false,
   error: null,
   apiKeySelected: false,
@@ -58,6 +60,8 @@ export const appReducer = (state: GlobalAppState, action: AppAction): GlobalAppS
       return { ...state, selectedVoice: action.payload };
     case 'SET_SELECTED_MODEL':
       return { ...state, selectedModel: action.payload };
+    case 'SET_SELECTED_OUTPUT_FORMAT': // New case
+      return { ...state, selectedOutputFormat: action.payload };
     case 'SET_IS_LOADING':
       return { ...state, isLoading: action.payload };
     case 'SET_ERROR':

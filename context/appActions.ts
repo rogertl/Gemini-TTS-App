@@ -1,5 +1,6 @@
 
-import { AppAction, HistoryItem, AdvancedModelConfig, AdvancedModelType } from '../types';
+
+import { AppAction, HistoryItem, AdvancedModelConfig, AdvancedModelType, OutputFormat } from '../types';
 import { initialAppState } from './appReducer'; // Import here to avoid circular dependency
 
 export const setCurrentStep = (step: number): AppAction => ({ type: 'SET_CURRENT_STEP', payload: step });
@@ -8,6 +9,7 @@ export const setOptimizedTextInput = (text: string): AppAction => ({ type: 'SET_
 export const setSelectedColloquialStyle = (style: string): AppAction => ({ type: 'SET_SELECTED_COLLOQUIAL_STYLE', payload: style });
 export const setSelectedVoice = (voice: string): AppAction => ({ type: 'SET_SELECTED_VOICE', payload: voice });
 export const setSelectedModel = (model: string): AppAction => ({ type: 'SET_SELECTED_MODEL', payload: model });
+export const setSelectedOutputFormat = (format: OutputFormat): AppAction => ({ type: 'SET_SELECTED_OUTPUT_FORMAT', payload: format }); // New action
 export const setIsLoading = (isLoading: boolean): AppAction => ({ type: 'SET_IS_LOADING', payload: isLoading });
 export const setError = (error: string | null): AppAction => ({ type: 'SET_ERROR', payload: error });
 export const setApiKeySelected = (selected: boolean): AppAction => ({ type: 'SET_API_KEY_SELECTED', payload: selected });
