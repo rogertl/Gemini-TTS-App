@@ -6,10 +6,11 @@ import { getFriendlyErrorMessage } from '../utils/errorUtils'; // Import the new
 
 export const useAudioPlayback = () => {
   const { state, dispatch } = useAppContext();
-  const { audioBlobUrl, isLoading, isPlaying, isDuringPlayback, audioRef, audioContext } = state;
+  const { audioBlobUrl, isPlaying, isDuringPlayback, audioRef, audioContext } = state;
 
   const handlePlayToggle = useCallback(async () => {
-    console.log('useAudioPlayback: handlePlayToggle called. isPlaying:', isPlaying, 'audioBlobUrl:', audioBlobUrl);
+    console.log('useAudioPlayback: handlePlayToggle called. isPlaying:', isPlaying);
+    
     if (!audioRef.current) {
       console.error('useAudioPlayback: audioRef.current is null');
       dispatch(setError(getFriendlyErrorMessage('音频播放器未准备好。')));
@@ -25,11 +26,10 @@ export const useAudioPlayback = () => {
       dispatch(setError(getFriendlyErrorMessage('音频上下文未初始化。')));
       return;
     }
-    console.log('useAudioPlayback: audioRef.current exists. Current src:', audioRef.current.src);
 
     // Ensure AudioContext is running before attempting to play
     if (audioContext.state === 'suspended') {
-      console.log(`useAudioPlayback: AudioContext is ${audioContext.state}, attempting to resume for playback...`);
+      console.log(`useAudioPlayback: AudioContext is ${audioContext.state}, attempting to resume...`);
       try {
         await audioContext.resume();
         console.log("useAudioPlayback: AudioContext resumed.");
@@ -38,34 +38,39 @@ export const useAudioPlayback = () => {
         dispatch(setError(getFriendlyErrorMessage(`无法激活音频播放：${e instanceof Error ? e.message : String(e)}`)));
         return;
       }
-    } else {
-      console.log(`useAudioPlayback: AudioContext is already ${audioContext.state}.`);
     }
 
-
     if (isPlaying) {
+      // PAUSE Logic
+      console.log('useAudioPlayback: Pausing audio.');
       audioRef.current.pause();
       dispatch(setIsPlaying(false));
-      console.log('useAudioPlayback: Audio paused.');
     } else {
-      audioRef.current.src = audioBlobUrl; // Ensure src is set
-      audioRef.current.load(); // Explicitly call load() to ensure metadata is loaded
+      // PLAY Logic
+      
+      // Check current src and update if needed
+      const currentSrc = audioRef.current.currentSrc || audioRef.current.src || '';
+      const newSrcStr = audioBlobUrl;
 
-      console.log('useAudioPlayback: Attempting to play audio.');
-      console.log('  audioRef.current.readyState:', audioRef.current.readyState); // 0=HAVE_NOTHING, 1=HAVE_METADATA, 2=HAVE_CURRENT_DATA, 3=HAVE_FUTURE_DATA, 4=HAVE_ENOUGH_DATA
-      console.log('  audioRef.current.networkState:', audioRef.current.networkState); // 0=NETWORK_EMPTY, 1=NETWORK_IDLE, 2=NETWORK_LOADING, 3=NETWORK_NO_SOURCE
+      // Only load if the source URL string is actually different
+      if (currentSrc !== newSrcStr) {
+        console.log('useAudioPlayback: Source changed. Loading new source.');
+        audioRef.current.src = newSrcStr;
+        audioRef.current.load(); // Explicitly load for new source
+      } else {
+        console.log('useAudioPlayback: Resuming existing source.');
+      }
 
-      // Try to play directly, as browsers often require user gesture
+      // Try to play
       const playPromise = audioRef.current.play();
 
       if (playPromise !== undefined) {
         playPromise.then(() => {
+          console.log('useAudioPlayback: Playback started successfully.');
           dispatch(setIsPlaying(true));
           dispatch(setIsDuringPlayback(true));
-          console.log('useAudioPlayback: Audio playback initiated successfully.');
         }).catch(playError => {
           console.error('useAudioPlayback: Error initiating audio playback:', playError);
-          // More descriptive message for autoplay issues
           let errorMessage = `无法播放音频：${playError instanceof Error ? playError.message : String(playError)}。`;
           if (playError.name === "NotAllowedError" || playError.name === "AbortError") {
             errorMessage += " 这可能是由于浏览器自动播放策略限制，请尝试手动播放，或确保页面有用户交互。";
@@ -75,10 +80,10 @@ export const useAudioPlayback = () => {
           dispatch(setIsDuringPlayback(false));
         });
       } else {
-        // Fallback for older browsers that don't return a Promise
+        // Fallback for older browsers
+        console.log('useAudioPlayback: Playback started (no promise).');
         dispatch(setIsPlaying(true));
         dispatch(setIsDuringPlayback(true));
-        console.log('useAudioPlayback: Audio playback initiated (no promise returned).');
       }
     }
   }, [isPlaying, audioRef, audioBlobUrl, audioContext, dispatch]);
@@ -86,7 +91,7 @@ export const useAudioPlayback = () => {
   const handleStopPlayback = useCallback(() => {
     if (audioRef.current) {
       audioRef.current.pause();
-      audioRef.current.currentTime = 0;
+      audioRef.current.currentTime = 0; // Reset to start
     }
     dispatch(setIsPlaying(false));
     dispatch(setIsDuringPlayback(false));
@@ -94,22 +99,23 @@ export const useAudioPlayback = () => {
   }, [audioRef, dispatch]);
 
   const handleAudioEnded = useCallback(() => {
+    console.log('useAudioPlayback: Audio playback ended event received.');
     dispatch(setIsPlaying(false));
     dispatch(setIsDuringPlayback(false));
     if (audioRef.current) {
       audioRef.current.currentTime = 0;
     }
-    console.log('useAudioPlayback: Audio playback ended.');
   }, [audioRef, dispatch]);
 
   // Attach/detach onEnded listener
   useEffect(() => {
-    if (audioRef.current) {
-      audioRef.current.addEventListener('ended', handleAudioEnded);
+    const audioEl = audioRef.current;
+    if (audioEl) {
+      audioEl.addEventListener('ended', handleAudioEnded);
     }
     return () => {
-      if (audioRef.current) {
-        audioRef.current.removeEventListener('ended', handleAudioEnded);
+      if (audioEl) {
+        audioEl.removeEventListener('ended', handleAudioEnded);
       }
     };
   }, [audioRef, handleAudioEnded]);

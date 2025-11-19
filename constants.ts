@@ -1,5 +1,6 @@
 
 
+
 import { VoiceOption, TTSModelOption, ColloquialStyleOption, OutputFormatOption, OutputFormat } from './types';
 
 export const VOICE_OPTIONS: VoiceOption[] = [
@@ -47,7 +48,7 @@ export const LOCAL_STORAGE_HISTORY_KEY = 'geminiTtsHistory';
 // App Metadata
 export const APP_AUTHOR = 'Roger';
 export const APP_GITHUB_URL = 'https://github.com/rogertl/Gemini-TTS-App';
-export const APP_VERSION = '1.1.2'; // Updated version for MP3 implementation
+export const APP_VERSION = '1.1.3'; // Updated version
 export const APP_PUBLISH_DATE = '2025-10-30';
 
 export const MIT_LICENSE_TEXT = `MIT License

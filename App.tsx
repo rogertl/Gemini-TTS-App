@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import { useAppContext } from './context/AppContext';
 import { useApiKeyStatus } from './hooks/useApiKeyStatus';
@@ -20,37 +21,54 @@ function App() {
     audioRef, showErrorModal, errorModalMessage 
   } = state;
 
-  // Effect to stop playing, clear audio when inputs or settings change, or step changes
+  // Effect 1: Handle Playback stopping logic specifically when navigation or data changes
+  // Separated from general error clearing to prevent race conditions or loops
   useEffect(() => {
-    if (isPlaying && audioRef.current) {
-      audioRef.current.pause();
-    }
-    dispatch(setIsPlaying(false));
-    dispatch(setIsDuringPlayback(false)); // Stop disabling other interactions
+    // If user leaves step 3, or if audioBlobUrl is cleared/changed externally
+    const shouldStopPlayback = currentStep !== 3 || !audioBlobUrl;
 
+    if (shouldStopPlayback) {
+      if (state.isPlaying && audioRef.current) {
+        audioRef.current.pause();
+      }
+      if (state.isPlaying) dispatch(setIsPlaying(false));
+      if (state.isDuringPlayback) dispatch(setIsDuringPlayback(false));
+    }
+
+    // Cleanup URL when leaving Step 3
     if (currentStep !== 3 && audioBlobUrl) {
       URL.revokeObjectURL(audioBlobUrl);
       dispatch(setAudioBlobUrl(null));
     }
-    
+  }, [currentStep, audioBlobUrl, dispatch, audioRef, state.isPlaying, state.isDuringPlayback]);
+
+  // Effect 2: General error clearing based on input changes
+  useEffect(() => {
     // Only clear general errors if not related to API key or loading
-    // Re-check `error` state against `apiKeySelected` and `isLoading` for more precise clearing.
-    // If errorModalMessage is present, don't clear the generic error prematurely.
     if (error && !error.includes('API 密钥') && !isLoading && apiKeySelected && !showErrorModal) {
       dispatch(setError(null));
     }
-  }, [state.originalTextInput, state.selectedColloquialStyle, state.selectedVoice, state.selectedModel, currentStep, audioBlobUrl, isPlaying, isLoading, error, dispatch, audioRef, apiKeySelected, showErrorModal]);
-
+  }, [
+    state.originalTextInput, 
+    state.selectedColloquialStyle, 
+    state.selectedVoice, 
+    state.selectedModel, 
+    dispatch, 
+    apiKeySelected, 
+    error, 
+    isLoading, 
+    showErrorModal
+  ]);
 
   // API Key Status Check (using custom hook)
-  const { apiKeySelected: hookApiKeySelected } = useApiKeyStatus(); // Adjusted destructuring
+  const { apiKeySelected: hookApiKeySelected } = useApiKeyStatus(); 
 
   return (
     <div className="flex flex-col space-y-6">
       <h1 className="text-3xl font-bold text-gray-800 mb-2 text-center">Gemini 文字转语音</h1>
 
       {/* API Key Selection Warning */}
-      {!hookApiKeySelected && <ApiKeyPrompt />} {/* Adjusted prop */}
+      {!hookApiKeySelected && <ApiKeyPrompt />} 
 
       {/* Main Steps */}
       {currentStep === 1 && <Step1Input />}
